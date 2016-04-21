@@ -14,7 +14,7 @@ int main() {
 	//	return 1;
 	//sf::Sprite Sprite;
 
-	int x = 0, y = 0, speed = 1;	//Speed of Player
+	double x = 0, y = 0, speed = .5;	//Speed of Player
 	while (window.isOpen()) {
 		sf::Event event;
 		while (window.pollEvent(event)) {
