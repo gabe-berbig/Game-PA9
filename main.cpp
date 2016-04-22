@@ -19,16 +19,28 @@ int main() {
 		while (window.pollEvent(event)) {
 			if (event.type == sf::Event::Closed)
 				window.close();
-			if (event.type == sf::Event::KeyPressed) {
+			if (event.type == sf::Event::KeyPressed) {		///Keyboard Commands
 				if (event.key.code == sf::Keyboard::W || event.key.code == sf::Keyboard::Up)	// Move Up
 					x = 0, y = -speed;
 				if (event.key.code == sf::Keyboard::S || event.key.code == sf::Keyboard::Down)	// Move Down
 					x = 0, y = speed;
-				if (event.key.code == sf::Keyboard::D || event.key.code == sf::Keyboard:: Right)	// Move Right
+				if (event.key.code == sf::Keyboard::D || event.key.code == sf::Keyboard::Right)	// Move Right
 					x = speed, y = 0;
-				if (event.key.code == sf::Keyboard:: A || event.key.code == sf::Keyboard::Left)		// Move Left
+				if (event.key.code == sf::Keyboard::A || event.key.code == sf::Keyboard::Left)		// Move Left
 					x = -speed, y = 0;
 				if (event.key.code == sf::Keyboard::Escape)	// Press Esc to Exit
+					window.close();
+			}
+			if (event.type == sf::Event::JoystickMoved || event.type == sf::Event::JoystickButtonPressed) {	///Controller Directionals
+				if (event.joystickMove.axis == sf::Joystick::PovY && event.joystickMove.position == 100)	//Up
+					x = 0, y = -speed;
+				if (event.joystickMove.axis == sf::Joystick::PovY && event.joystickMove.position == -100)	//Down
+					x = 0, y = speed;
+				if (event.joystickMove.axis == sf::Joystick::PovX && event.joystickMove.position == 100)	//Right
+					x = speed, y = 0;
+				if (event.joystickMove.axis == sf::Joystick::PovX && event.joystickMove.position == -100)	//Left
+					x = -speed, y = 0;
+				if (event.joystickButton.button == 6)	//Press Back to Exit
 					window.close();
 			}
 		}
@@ -36,9 +48,9 @@ int main() {
 		if (player.getPosition().x >= SCREEN_X)						///If Player goes off screen, spawns on the other side
 			player.setPosition(1, player.getPosition().y);				//Right Border
 		else if (player.getPosition().x <= 0)
-			player.setPosition(SCREEN_X-1, player.getPosition().y);		//Left Border
+			player.setPosition(SCREEN_X - 1, player.getPosition().y);		//Left Border
 		else if (player.getPosition().y >= SCREEN_Y)
-			player.setPosition(player.getPosition().x-1, 1);			//Top Border
+			player.setPosition(player.getPosition().x - 1, 1);			//Top Border
 		else if (player.getPosition().y <= 0)
 			player.setPosition(player.getPosition().x, SCREEN_Y - 1);	//Bottom Border
 
@@ -60,7 +72,7 @@ int main() {
 			e_y = -e_speed;		//Moves down
 		enemy.move(e_x, e_y);	///Enemy movement
 
-		
+
 
 		window.clear();
 		window.draw(player);	//Draws Player
