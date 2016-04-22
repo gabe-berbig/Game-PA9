@@ -32,6 +32,7 @@ int main() {
 					window.close();
 			}
 		}
+
 		if (player.getPosition().x >= SCREEN_X)						///If Player goes off screen, spawns on the other side
 			player.setPosition(1, player.getPosition().y);				//Right Border
 		else if (player.getPosition().x <= 0)
@@ -43,16 +44,23 @@ int main() {
 
 		player.move(x, y);	//Player Movement
 
+		int collision = 10;
+		if (enemy.getPosition().x > player.getPosition().x - collision && enemy.getPosition().x < player.getPosition().x + collision
+			&& enemy.getPosition().y > player.getPosition().y - collision && enemy.getPosition().y < player.getPosition().y + collision)
+			enemy.setPosition(0, 0);	//Enemy Collision
+
 		double e_x = 0, e_y = 0, e_speed = .1;	///Enemy Movement towards player
 		if (enemy.getPosition().x < player.getPosition().x)
-			e_x = e_speed;	//Moves to right
+			e_x = e_speed;		//Moves to right
 		else if (enemy.getPosition().x > player.getPosition().x)
-			e_x = -e_speed;	//Moves to left
+			e_x = -e_speed;		//Moves to left
 		if (enemy.getPosition().y < player.getPosition().y)
-			e_y = e_speed;	//Moves up
+			e_y = e_speed;		//Moves up
 		else if (enemy.getPosition().y > player.getPosition().y)
-			e_y = -e_speed;	//Moves down
-		enemy.move(e_x, e_y);	//Enemy movement
+			e_y = -e_speed;		//Moves down
+		enemy.move(e_x, e_y);	///Enemy movement
+
+		
 
 		window.clear();
 		window.draw(player);	//Draws Player
