@@ -31,7 +31,7 @@ int main() {
 				if (event.key.code == sf::Keyboard::Escape)	// Press Esc to Exit
 					window.close();
 			}
-			if (event.type == sf::Event::JoystickMoved || event.type == sf::Event::JoystickButtonPressed) {	///Controller Directionals
+			if (event.type == sf::Event::JoystickMoved) {	///Controller Directionals
 				if (event.joystickMove.axis == sf::Joystick::PovY && event.joystickMove.position == 100)	//Up
 					x = 0, y = -speed;
 				if (event.joystickMove.axis == sf::Joystick::PovY && event.joystickMove.position == -100)	//Down
@@ -40,11 +40,12 @@ int main() {
 					x = speed, y = 0;
 				if (event.joystickMove.axis == sf::Joystick::PovX && event.joystickMove.position == -100)	//Left
 					x = -speed, y = 0;
+			}
+			if (event.type == sf::Event::JoystickButtonPressed) {	///Controller Action Buttons
 				if (event.joystickButton.button == 6)	//Press Back to Exit
 					window.close();
 			}
 		}
-
 		if (player.getPosition().x >= SCREEN_X)						///If Player goes off screen, spawns on the other side
 			player.setPosition(1, player.getPosition().y);				//Right Border
 		else if (player.getPosition().x <= 0)
@@ -71,8 +72,6 @@ int main() {
 		else if (enemy.getPosition().y > player.getPosition().y)
 			e_y = -e_speed;		//Moves down
 		enemy.move(e_x, e_y);	///Enemy movement
-
-
 
 		window.clear();
 		window.draw(player);	//Draws Player
