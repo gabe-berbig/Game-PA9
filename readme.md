@@ -1,4 +1,4 @@
-### H3 PA9- Game: Ninjas Game
+### H3 PA9- Game: Ninja Game
 
 (Someone think of a better name...)
 
