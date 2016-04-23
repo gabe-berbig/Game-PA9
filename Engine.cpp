@@ -1,9 +1,7 @@
 #include "Engine.h"
 
 Game::Game() {
-	DASH = 0;
-	x = 0;
-	y = 0;
+	DASH = 0, x = 0, y = 0;
 }
 
 Game::~Game() {
