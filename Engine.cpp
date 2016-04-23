@@ -23,14 +23,14 @@ void Game::run() {
 
 	///Creates Player	[Makes into function]
 	sf::Texture player_texture;
-	if (!player_texture.loadFromFile("player.png")) {
+	if (!player_texture.loadFromFile("sprites/player.png")) {
 		//Error Loading
 	}
 	sf::Sprite player(player_texture);
 	player.setPosition(500, 300);
 	///Creates Enemy	[Make into function]
 	sf::Texture enemy_texture;
-	if (!enemy_texture.loadFromFile("enemy.png")) {
+	if (!enemy_texture.loadFromFile("sprites/enemy.png")) {
 	}
 	sf::Sprite enemy(enemy_texture);
 	enemy.setPosition(300, 300);	//Spawning Point
