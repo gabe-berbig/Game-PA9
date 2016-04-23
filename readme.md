@@ -1,4 +1,3 @@
-# H1 PA9- Game: Something about Ninjas
-(Someone think of a better name)
+# H3 PA9- Game: Ninjas Game (Someone think of a better name)
 
 Coders: Cong, Pedro, Gabe, Hans
