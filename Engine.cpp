@@ -1,37 +1,30 @@
 #include "Engine.h"
 
 Game::Game() {
-	DASH = 0, x = 0, y = 0;
+	DASH = 0, x = 0, y = 0, p_timer = 0, e_timer;
 }
 
 Game::~Game() {
 }
-
-//void Game::createPlayer(sf::Sprite &player) {	///Can't get this to work
-//	sf::Texture player_texture;
-//	if (!player_texture.loadFromFile("player.png")) {
-//		//Error Loading
-//	}
-//	player.setTexture(player_texture);
-//	player.setPosition(500, 300);
-//}
 
 void Game::run() {
 	sf::RenderWindow window(sf::VideoMode(SCREEN_X, SCREEN_Y), "Ninja Game");
 
 	///Creates Player	[Makes into function]
 	sf::Texture player_texture;
-	if (!player_texture.loadFromFile("sprites/player.png")) {
-		//Error Loading
-	}
+	player_texture.loadFromFile("sprites/player.png");
 	sf::Sprite player(player_texture);
-	player.setPosition(500, 300);
 	///Creates Enemy	[Make into function]
 	sf::Texture enemy_texture;
-	if (!enemy_texture.loadFromFile("sprites/enemy.png")) {
+	enemy_texture.loadFromFile("sprites/enemy.png");
+	sf::Sprite enemy[MAX_ENEMIES];
+	for (int x = 0; x < MAX_ENEMIES; x++) {
+		enemy[x].setTexture(enemy_texture);
 	}
-	sf::Sprite enemy(enemy_texture);
-	enemy.setPosition(300, 300);	//Spawning Point
+	///Sets Positions
+	player.setPosition(500, 300);
+	enemy[0].setPosition(300, 300);	//Spawning Point
+
 	///
 
 	while (window.isOpen()) {
@@ -42,12 +35,12 @@ void Game::run() {
 			attack(event);						//Character's attacks
 		}
 		border(player);					//Border so player does not go off screen
-		movementUpdate(player, enemy);	//Player & Enemy Movement Updates
-		collision(player, enemy);
+		movementUpdate(player, enemy[0]);	//Player & Enemy Movement Updates
+		collision(player, enemy[0]);
 
 		window.clear();
 		window.draw(player);	//Draws Player
-		window.draw(enemy);		//Draws Enemy
+		window.draw(enemy[0]);		//Draws Enemy
 		window.display();
 	}
 }
@@ -94,7 +87,7 @@ void Game::movementUpdate(sf::Sprite &player, sf::Sprite &enemy) {
 	else
 		player.move(x, y);	//Player Movement
 							///Enemies Movements, follows player
-	double e_x = 0, e_y = 0, e_speed = .1;	///Enemy Movement towards player
+	double e_x = 0, e_y = 0, e_speed = .09;	///Enemy Movement towards player
 	if (enemy.getPosition().x < player.getPosition().x)
 		e_x = e_speed;		//Moves to right
 	else if (enemy.getPosition().x > player.getPosition().x)
@@ -103,6 +96,8 @@ void Game::movementUpdate(sf::Sprite &player, sf::Sprite &enemy) {
 		e_y = e_speed;		//Moves up
 	else if (enemy.getPosition().y > player.getPosition().y)
 		e_y = -e_speed;		//Moves down
+	if (x == 0 && y == 0)
+		e_x = 0, e_y = 0;	//Won't move until player moves
 	enemy.move(e_x, e_y);
 }
 
@@ -111,11 +106,22 @@ void Game::collision(sf::Sprite &player, sf::Sprite &enemy) {
 	///Enemy Collision (Damage Detection)
 	if (enemy.getPosition().x > player.getPosition().x - collision && enemy.getPosition().x < player.getPosition().x + collision
 		&& enemy.getPosition().y > player.getPosition().y - collision && enemy.getPosition().y < player.getPosition().y + collision) {
-		if (DASH != 0)
+		if (DASH != 0) {
 			enemy.setColor(sf::Color(255, dmg, dmg));	//Enemy Collision [Damage taken, changes Red]
-		else
+			e_timer = 400;
+		} else {
 			player.setColor(sf::Color(255, dmg, dmg));	//Player Collision [Damage taken, changes Red]
+			p_timer = 400;
+		}
 	}
+	if (e_timer != 0)
+		e_timer--;
+	else
+		enemy.setColor(sf::Color(255, 255, 255));
+	if (p_timer != 0)
+		p_timer--;
+	else
+		player.setColor(sf::Color(255, 255, 255));
 }
 
 void Game::check_closeWindows(sf::Event event, sf::RenderWindow &window) {
@@ -139,3 +145,11 @@ void Game::border(sf::Sprite &player) {
 	if (player.getPosition().y <= 0)
 		player.setPosition(player.getPosition().x, SCREEN_Y - 1);	//Bottom Border
 }
+
+//void Game::createPlayer(sf::Sprite &player) {	///Can't get this to work
+//	sf::Texture player_texture;
+//	if (!player_texture.loadFromFile("player.png")) {
+//		//Error Loading
+//	}
+//	player.setTexture(player_texture);
+//}
