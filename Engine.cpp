@@ -1,14 +1,18 @@
 #include "Engine.h"
 
 Game::Game() {
-	DASH = 0, x = 0, y = 0, p_timer = 0, e_timer;
+	DASH = 0, x = 0, y = 0;
+	total_enemies = 1;
+	p_timer = 0;
+	e_timer = 0;
 }
 
 Game::~Game() {
 }
 
 void Game::run() {
-	sf::RenderWindow window(sf::VideoMode(SCREEN_X, SCREEN_Y), "Ninja Game");
+	sf::RenderWindow window(sf::VideoMode(SCREEN_X, SCREEN_Y), "Shogun Master");
+	srand((unsigned int)time(NULL));
 
 	///Creates Player	[Makes into function]
 	sf::Texture player_texture;
@@ -20,12 +24,10 @@ void Game::run() {
 	sf::Sprite enemy[MAX_ENEMIES];
 	for (int x = 0; x < MAX_ENEMIES; x++) {
 		enemy[x].setTexture(enemy_texture);
+		enemy[x].setPosition(rand_int(100, SCREEN_X - 100), rand_int(100, SCREEN_Y - 100));	//Spawning Point
 	}
 	///Sets Positions
 	player.setPosition(500, 300);
-	enemy[0].setPosition(300, 300);	//Spawning Point
-
-	///
 
 	while (window.isOpen()) {
 		sf::Event event;
@@ -35,12 +37,15 @@ void Game::run() {
 			attack(event);						//Character's attacks
 		}
 		border(player);					//Border so player does not go off screen
-		movementUpdate(player, enemy[0]);	//Player & Enemy Movement Updates
+		for (int x = 0; x < total_enemies; x++)
+			border(enemy[x]);
+		movementUpdate(player, enemy);	//Player & Enemy Movement Updates
 		collision(player, enemy[0]);
 
 		window.clear();
 		window.draw(player);	//Draws Player
-		window.draw(enemy[0]);		//Draws Enemy
+		for (int x = 0; x < total_enemies; x++)
+			window.draw(enemy[x]);		//Draws Enemy
 		window.display();
 	}
 }
@@ -78,27 +83,36 @@ void Game::player_movement(sf::Event event) {
 	}
 }
 
-void Game::movementUpdate(sf::Sprite &player, sf::Sprite &enemy) {
+void Game::movementUpdate(sf::Sprite &player, sf::Sprite enemy[]) {
 	///Player's Movements
+	playerUpdate(player);
+	for (int x = 0; x < total_enemies; x++) {
+		enemyAiUpdate(player, enemy[x]);
+	}
+}
+
+void Game::playerUpdate(sf::Sprite &player) {
 	if (DASH != 0) {	//Dash acts like a timer, speeds up until 0
 		player.move(x * 3, y * 3);	//Dash
 		--DASH;						//Counts down
 	}
 	else
 		player.move(x, y);	//Player Movement
-							///Enemies Movements, follows player
-	double e_x = 0, e_y = 0, e_speed = .09;	///Enemy Movement towards player
+}
+
+void Game::enemyAiUpdate(sf::Sprite &player, sf::Sprite &enemy) {
+	double x = 1, y = 1, speed = .08;	///Enemy Movement towards player
 	if (enemy.getPosition().x < player.getPosition().x)
-		e_x = e_speed;		//Moves to right
+		x = speed;		//Moves to right
 	else if (enemy.getPosition().x > player.getPosition().x)
-		e_x = -e_speed;		//Moves to left
+		x = -speed;		//Moves to left
 	if (enemy.getPosition().y < player.getPosition().y)
-		e_y = e_speed;		//Moves up
+		y = speed;		//Moves up
 	else if (enemy.getPosition().y > player.getPosition().y)
-		e_y = -e_speed;		//Moves down
-	if (x == 0 && y == 0)
-		e_x = 0, e_y = 0;	//Won't move until player moves
-	enemy.move(e_x, e_y);
+		y = -speed;		//Moves down
+	if (this->x == 0 && this->y == 0)
+		x = 0, y = 0;	//Won't move until player moves
+	enemy.move(x, y);
 }
 
 void Game::collision(sf::Sprite &player, sf::Sprite &enemy) {
@@ -144,6 +158,10 @@ void Game::border(sf::Sprite &player) {
 		player.setPosition(player.getPosition().x - 1, 1);			//Top Border
 	if (player.getPosition().y <= 0)
 		player.setPosition(player.getPosition().x, SCREEN_Y - 1);	//Bottom Border
+}
+
+int Game::rand_int(int min, int quantity) {
+	return rand() % quantity + min;
 }
 
 //void Game::createPlayer(sf::Sprite &player) {	///Can't get this to work
