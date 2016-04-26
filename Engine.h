@@ -16,17 +16,20 @@ public:
 	~Game();
 	void run();
 	void attack(sf::Event event);
+	void throwStar(sf::Sprite &star, sf::Sprite &player);
 	void player_movement(sf::Event event);
-	void movementUpdate(sf::Sprite &player, sf::Sprite enemy[]);
+	void movementUpdate(sf::Sprite &player, sf::Sprite enemy[], sf::Sprite &star);
 	void playerUpdate(sf::Sprite &player);
 	void enemyAiUpdate(sf::Sprite &player, sf::Sprite &enemy);
-	void collision(sf::Sprite &player, sf::Sprite &enemy);
+	void collision(sf::Sprite &player, sf::Sprite &enemy, sf::Sprite &star);
 	void check_closeWindows(sf::Event event, sf::RenderWindow &window);
 	void border(sf::Sprite &player);
 	int rand_int(int min, int quantity);
+
 	//void Game::createPlayer(sf::Sprite &player);
 private:
 	int DASH;
+	bool THROW;
 	double x, y;
 	int total_enemies;
 	int p_timer;
