@@ -3,10 +3,12 @@
 #include <SFML/System.hpp>
 #include <iostream>
 #include <time.h>
+#include "Player.h"
+#include "Star.h"
 
 #define SCREEN_X 1000	//Size of Memory, can be changed
 #define SCREEN_Y 800	//Size of Memory, can be changed
-#define ATTK_SPD 250	//Speed of Player Attack
+#define DASH_TIME 250	//Speed of Player Attack
 #define P_SPD .2		//Player's Speed
 #define MAX_ENEMIES 5
 
@@ -15,22 +17,16 @@ public:
 	Game();
 	~Game();
 	void run();
-	void attack(sf::Event event);
-	void throwStar(sf::Sprite &star, sf::Sprite &player);
-	void player_movement(sf::Event event);
-	void movementUpdate(sf::Sprite &player, sf::Sprite enemy[], sf::Sprite &star);
-	void playerUpdate(sf::Sprite &player);
-	void enemyAiUpdate(sf::Sprite &player, sf::Sprite &enemy);
-	void collision(sf::Sprite &player, sf::Sprite &enemy, sf::Sprite &star);
-	void check_closeWindows(sf::Event event, sf::RenderWindow &window);
-	void border(sf::Sprite &player);
+	void collision(sf::Sprite &player, sf::Sprite &enemy, Star *star);
 	int rand_int(int min, int quantity);
-
-	//void Game::createPlayer(sf::Sprite &player);
+	///Attack Class
+	void attack(sf::Event event, Player *player);
+	///Enemy Class
+	void enemyAiUpdate(Player *player, sf::Sprite &enemy);
+	///Event Class
+	void movementUpdate(Player *player, sf::Sprite enemy[], Star *star);
+	void check_closeWindows(sf::Event event, sf::RenderWindow &window);
 private:
-	int DASH;
-	bool THROW;
-	double x, y;
 	int total_enemies;
 	int p_timer;
 	int e_timer;
