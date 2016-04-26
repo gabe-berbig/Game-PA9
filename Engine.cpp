@@ -2,7 +2,8 @@
 
 Game::Game() {
 	DASH = 0, x = 0, y = 0;
-	total_enemies = 1;
+	THROW = false;
+	total_enemies = 3;
 	p_timer = 0;
 	e_timer = 0;
 }
@@ -11,9 +12,16 @@ Game::~Game() {
 }
 
 void Game::run() {
-	sf::RenderWindow window(sf::VideoMode(SCREEN_X, SCREEN_Y), "Shogun Master");
+	sf::RenderWindow window(sf::VideoMode(SCREEN_X, SCREEN_Y), "Shogun-Master Makano");
 	srand((unsigned int)time(NULL));
-
+	///Background
+	sf::Texture background_texture;
+	background_texture.loadFromFile("sprites/background.png");
+	sf::Sprite background(background_texture);
+	///Star
+	sf::Texture star_texture;
+	star_texture.loadFromFile("sprites/star.png");
+	sf::Sprite star(star_texture);
 	///Creates Player	[Makes into function]
 	sf::Texture player_texture;
 	player_texture.loadFromFile("sprites/player.png");
@@ -24,10 +32,10 @@ void Game::run() {
 	sf::Sprite enemy[MAX_ENEMIES];
 	for (int x = 0; x < MAX_ENEMIES; x++) {
 		enemy[x].setTexture(enemy_texture);
-		enemy[x].setPosition(rand_int(100, SCREEN_X - 100), rand_int(100, SCREEN_Y - 100));	//Spawning Point
+		enemy[x].setPosition(rand_int(1, SCREEN_X-100), rand_int(1, 350));	//Spawning Point
 	}
 	///Sets Positions
-	player.setPosition(500, 300);
+	player.setPosition(500, 630);
 
 	while (window.isOpen()) {
 		sf::Event event;
@@ -37,12 +45,13 @@ void Game::run() {
 			attack(event);						//Character's attacks
 		}
 		border(player);					//Border so player does not go off screen
-		for (int x = 0; x < total_enemies; x++)
-			border(enemy[x]);
-		movementUpdate(player, enemy);	//Player & Enemy Movement Updates
-		collision(player, enemy[0]);
+		//Enemy UI
+		movementUpdate(player, enemy, star);	//Player & Enemy Movement Updates
+		collision(player, enemy[0], star);
 
 		window.clear();
+		window.draw(background);	//Draws Player
+		window.draw(star);
 		window.draw(player);	//Draws Player
 		for (int x = 0; x < total_enemies; x++)
 			window.draw(enemy[x]);		//Draws Enemy
@@ -51,13 +60,24 @@ void Game::run() {
 }
 
 void Game::attack(sf::Event event) {
-	if (event.type == sf::Event::KeyPressed)	///Keyboard Commands
-		if (event.key.code == sf::Keyboard::X)		//X = Dash Attack
+	if (event.type == sf::Event::KeyPressed) {	///Keyboard Commands
+		if (event.key.code == sf::Keyboard::Z)		//X = Dash
 			DASH = ATTK_SPD;
-	if (event.type == sf::Event::JoystickButtonPressed) {	///Controller Action Buttons
-		if (event.joystickButton.button == 0)					//A = Dash Attack
-			DASH = ATTK_SPD;
+		if (event.key.code == sf::Keyboard::X)		//X = Throw Attack
+			THROW = true;
 	}
+	if (event.type == sf::Event::JoystickButtonPressed) {	///Controller Action Buttons
+		if (event.joystickButton.button == 0)					//A = Dash
+			DASH = ATTK_SPD;
+		if (event.joystickButton.button == 2)					//X = Throw Attack
+			THROW = true;
+	}
+}
+
+void Game::throwStar(sf::Sprite &star, sf::Sprite &player) {
+	int x = player.getPosition().x;
+	int y = player.getPosition().y;
+	star.setPosition(x + 15, y + 15);
 }
 
 void Game::player_movement(sf::Event event) {
@@ -83,11 +103,23 @@ void Game::player_movement(sf::Event event) {
 	}
 }
 
-void Game::movementUpdate(sf::Sprite &player, sf::Sprite enemy[]) {
+void Game::movementUpdate(sf::Sprite &player, sf::Sprite enemy[], sf::Sprite &star) {
 	///Player's Movements
-	playerUpdate(player);
+	playerUpdate(player);	//Player's movements updated
+	///Enemies' Movements
 	for (int x = 0; x < total_enemies; x++) {
-		enemyAiUpdate(player, enemy[x]);
+		enemyAiUpdate(player, enemy[x]);	//Enemies' movements updated
+	}
+	///Stars Movement
+	if (THROW != true)
+		throwStar(star, player);	//Checks if player pressed Throw Star
+	else if (star.getPosition().y == 0) {	///If Star goes off screen
+		star.setRotation(0);					//Star rotation resets
+		star.setPosition(-20, -20);				//Is places off screen
+		THROW = false;							//Throw is off, player can throw more stars
+	} else {								///Star is moved upwards towards enemies' side
+		star.rotate(.8);
+		star.move(0, -1);	//Star moved upwards
 	}
 }
 
@@ -101,41 +133,23 @@ void Game::playerUpdate(sf::Sprite &player) {
 }
 
 void Game::enemyAiUpdate(sf::Sprite &player, sf::Sprite &enemy) {
-	double x = 1, y = 1, speed = .08;	///Enemy Movement towards player
-	if (enemy.getPosition().x < player.getPosition().x)
-		x = speed;		//Moves to right
-	else if (enemy.getPosition().x > player.getPosition().x)
-		x = -speed;		//Moves to left
-	if (enemy.getPosition().y < player.getPosition().y)
-		y = speed;		//Moves up
-	else if (enemy.getPosition().y > player.getPosition().y)
-		y = -speed;		//Moves down
-	if (this->x == 0 && this->y == 0)
-		x = 0, y = 0;	//Won't move until player moves
-	enemy.move(x, y);
+	if (enemy.getPosition().x > SCREEN_X)
+		enemy.setPosition(-100, enemy.getPosition().y);
+	if (enemy.getPosition().x <= SCREEN_X)
+		enemy.move(.2, 0);
 }
 
-void Game::collision(sf::Sprite &player, sf::Sprite &enemy) {
-	int collision = 20, dmg = 100;
+void Game::collision(sf::Sprite &player, sf::Sprite &enemy, sf::Sprite &star) {
 	///Enemy Collision (Damage Detection)
-	if (enemy.getPosition().x > player.getPosition().x - collision && enemy.getPosition().x < player.getPosition().x + collision
-		&& enemy.getPosition().y > player.getPosition().y - collision && enemy.getPosition().y < player.getPosition().y + collision) {
-		if (DASH != 0) {
-			enemy.setColor(sf::Color(255, dmg, dmg));	//Enemy Collision [Damage taken, changes Red]
-			e_timer = 400;
-		} else {
-			player.setColor(sf::Color(255, dmg, dmg));	//Player Collision [Damage taken, changes Red]
-			p_timer = 400;
-		}
+	if ((enemy.getPosition().x > star.getPosition().x - 70 && enemy.getPosition().x < star.getPosition().x + 30)
+			&& (enemy.getPosition().y < star.getPosition().y && star.getPosition().y+30 < enemy.getPosition().y + 70)) {
+		enemy.setColor(sf::Color(255, 100, 100));	//Enemy Collision [Damage taken, changes Red]
+		e_timer = 400;
 	}
 	if (e_timer != 0)
 		e_timer--;
 	else
 		enemy.setColor(sf::Color(255, 255, 255));
-	if (p_timer != 0)
-		p_timer--;
-	else
-		player.setColor(sf::Color(255, 255, 255));
 }
 
 void Game::check_closeWindows(sf::Event event, sf::RenderWindow &window) {
@@ -150,14 +164,14 @@ void Game::check_closeWindows(sf::Event event, sf::RenderWindow &window) {
 }
 
 void Game::border(sf::Sprite &player) {
-	if (player.getPosition().x >= SCREEN_X)						///If Player goes off screen, spawns on the other side
-		player.setPosition(1, player.getPosition().y);				//Right Border
+	if (player.getPosition().x >= SCREEN_X-60)						///If Player goes off screen, spawns on the other side
+		player.setPosition(SCREEN_X-60, player.getPosition().y);	//left Border
 	if (player.getPosition().x <= 0)
-		player.setPosition(SCREEN_X - 1, player.getPosition().y);		//Left Border
-	if (player.getPosition().y >= SCREEN_Y)
-		player.setPosition(player.getPosition().x - 1, 1);			//Top Border
-	if (player.getPosition().y <= 0)
-		player.setPosition(player.getPosition().x, SCREEN_Y - 1);	//Bottom Border
+		player.setPosition(0, player.getPosition().y);	//left Border
+	if (player.getPosition().y <= 520)
+		player.setPosition(player.getPosition().x, 520);	//Top Border
+	if (player.getPosition().y >= SCREEN_Y-90)
+		player.setPosition(player.getPosition().x, SCREEN_Y - 90);	//Bottom Border
 }
 
 int Game::rand_int(int min, int quantity) {
