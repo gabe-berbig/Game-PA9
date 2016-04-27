@@ -1,7 +1,7 @@
 #include "visualObj.h"
 
 visualObj::visualObj() {
-
+	srand((unsigned int)time(NULL));
 }
 
 void visualObj::load(std::string filename) {
@@ -14,16 +14,25 @@ void visualObj::load(std::string filename) {
 		sprite.setTexture(texture);
 		isLoaded = true;
 	}
+	sprite.setOrigin(getWidth() / 2, getHeight() / 2);
 }
 
-void visualObj::draw(sf::RenderWindow & renderWindow) {
+void visualObj::draw(sf::RenderWindow & window) {
 	if (isLoaded)
-		renderWindow.draw(sprite);
+		window.draw(sprite);
+}
+
+void visualObj::setOrigin(int x, int y) {
+	sprite.setOrigin(x, y);
 }
 
 void visualObj::setPosition(double x, double y) {
 	if (isLoaded)
 		sprite.setPosition(x, y);
+}
+
+void visualObj::setColor(int r, int b, int g) {
+	sprite.setColor(sf::Color(r, b, g));
 }
 
 void visualObj::move(double x, double y) {

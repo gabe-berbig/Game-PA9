@@ -6,7 +6,7 @@ public:
 	Star();
 	~Star();
 	void Star::throwStar(visualObj *player);
-	void draw(sf::RenderWindow & rw);
+	void draw(sf::RenderWindow & window);
 	void Star::eventUpdate(sf::Event event);
 	void Star::moveUpdate(visualObj *player);
 private:
